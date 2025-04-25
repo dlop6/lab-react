@@ -10,19 +10,18 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    
     <style>
-        body{
+        body {
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
+            background-color: #000000;
         }
-        button{
-            background-color: #4CAF50;
+        button {
+            background-color: #1e5020;
             border: none;
             color: white;
             padding: 0.5rem 1rem;
@@ -31,18 +30,42 @@
             cursor: pointer;
             font-size: 1rem;
             transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .game-container {
             text-align: center;
-            background: white;
+            background: #4d4d4d9c;
             padding: 12rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: grid;
         }
         .counter {
-            font-size: 10px;
-            color: #333;
+            font-size: 1rem;
+            color: #ffffff;
+            margin: 1rem 0;
+            
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-align: center;
+            
+        }
+
+        .counter button{
+            background-color: #1e5020;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .counter button:hover {
+            background-color: #45a049;
         }
 
         /* estilos para la Card */
@@ -58,7 +81,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.6s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
         .card.flipped .card-inner {
@@ -82,12 +105,38 @@
             transform: rotateY(180deg);
         }
         .card-back {
-            background: #4CAF50;
+            background: linear-gradient(120deg, #b7d25f, #124814);
             color: white;
         }
+        .card-back:hover {
+            background: #45a049;
+            transform: scale(1.05);
+            transition: transform 0.3s;
+        }
+
         .card.matched .card-front {
             background: #e0f7fa;
             opacity: 0.7;
+        }
+
+        .card.matched {
+            opacity: 0.8;
+            filter: saturate(0.5);
+        }
+
+        .win-message{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4CAF50;
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transition: all 0.3s ease-in-out;
+            opacity: 0.9;
         }
 
         .grid {
@@ -97,7 +146,6 @@
             justify-content: center;
             align-items: center;
         }
-
     </style>
 </head>
 <body>
@@ -105,14 +153,11 @@
     
     <!-- Script principal con tipo babel -->
     <script type="text/babel">
-        const { useState } = React; 
+        const { useState, useEffect } = React; 
         
         let cardIcons = ["🦉", "🦉", "🎮", "🎮", "🌋", "🌋", "🧩", "🧩", "🐙", "🐙", "📚", "📚", "🚀", "🚀", "🍩", "🍩"]
         .sort(() => Math.random() - 0.5); 
 
-        
-       
-        
         // Componente principal del juego
         function MemoryGame() {
             // Lógica del juego con React hooks
@@ -127,9 +172,15 @@
 
             const [flippedIndices, setFlippedIndices] = useState([]);
             const [moves, setMoves] = useState(0);
-            
-            const handleCardClick = (id) => {
+            const [gameCompleted, setgameCompleted] = useState(false);
+            useEffect(() => {
+                if (cards.every(card => card.isMatched)) {
+                    setgameCompleted(true);
+                }
+            }, [cards]);
 
+      
+            const handleCardClick = (id) => {
                 if (cards[id].isFlipped || cards[id].isMatched) return; 
 
                 const newCards = [...cards];
@@ -138,21 +189,52 @@
 
                 const newFlipped = [...flippedIndices, id];
                 setFlippedIndices(newFlipped);
-                setMoves(moves + 1);
-
-
-
+                
+                if (newFlipped.length === 2) {
+                    setMoves(moves + 1);
+                    const [firstIndex, secondIndex] = newFlipped;
+                    if (cards[firstIndex].symbol === cards[secondIndex].symbol) {
+                        const updateCards = cards.map(card =>
+                            newFlipped.includes(card.id) ? { ...card, isMatched: true } : card
+                        );
+                        setCards(updateCards);
+                        setFlippedIndices([]);
+                    } else {
+                        setTimeout(() => {
+                            const resetCards = cards.map(card =>
+                                newFlipped.includes(card.id) ? { ...card, isFlipped: false } : card
+                            );
+                            setCards(resetCards);
+                            setFlippedIndices([]);
+                        }, 1000);
+                    }
+                }
             };
+
+            const resetGame = () => {
+                const shuffledIcons = [...cardIcons].sort(() => Math.random() - 0.5);
+                setCards(shuffledIcons.map((symbol, index) => ({
+                    id: index, 
+                    symbol, 
+                    isFlipped: false,
+                    isMatched: false,
+                })));
+                setMoves(0);
+                setFlippedIndices([]);
+                setgameCompleted(false);
+            };
+
             
             return (
                 <div className="game-container">
                     {/* Contador de movimientos */}
-                    <div class="counter" id="counter">
+                    <div className="counter" id="counter">
                         <h2>Movimientos: {moves}</h2>
-                        <button >Reiniciar</button>
+                        <button onClick={resetGame}>
+                            Reiniciar
+                        </button>
                     </div>
 
-                    
                     {/* Tablero de juego (grid) */}
                     <div className="grid">
                         {/* Mapeo de tarjetas */}
@@ -163,12 +245,17 @@
                                 symbol={card.symbol} 
                                 isFlipped={card.isFlipped} 
                                 isMatched={card.isMatched} 
-                                onClick={handleCardClick } // Función temporal
+                                onClick={handleCardClick} 
                             />
                         ))}
                     </div>
                     
-                    {/* Mensaje de juego completado (condicional) */}
+                    {gameCompleted && (
+                        <div className="win-message">
+                            <h2>¡Felicidades! Has ganado el juego.</h2>
+                            <button onClick={() => window.location.reload()}>Reiniciar</button>
+                        </div>
+                    )}
                 </div>
             );
         }
