@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo React+Babel</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        
+        .counter-container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .counter-value {
+            font-size: 3rem;
+            margin: 1rem 0;
+            color: #333;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .reset-btn {
+            background-color: #f44336;
+        }
+        
+        .reset-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React, ReactDOM y Babel (standalone) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Nuestro código React -->
+    <script type="text/babel">
+        function Counter() {
+            const [count, setCount] = React.useState(0);
+            
+            const increment = () => {
+                setCount(count + 1);
+            };
+            
+            const decrement = () => {
+                setCount(count - 1);
+            };
+            
+            const reset = () => {
+                setCount(0);
+            };
+            
+            return (
+                <div className="counter-container">
+                    <h1>Contador React</h1>
+                    <div className="counter-value">{count}</div>
+                    <div className="buttons">
+                        <button onClick={decrement}>-</button>
+                        <button onClick={increment}>+</button>
+                        <button className="reset-btn" onClick={reset}>Reset</button>
+                    </div>
+                    <p>Intenta cambiar el valor!</p>
+                </div>
+            );
+        }
+
+        // Renderizar el componente
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Counter />);
+    </script>
+</body>
+</html>
